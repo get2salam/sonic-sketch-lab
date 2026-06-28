@@ -1,0 +1,20 @@
+{
+  "name": "SonicSketch Lab",
+  "short_name": "SonicSketch",
+  "description": "Browser-based Web Audio sketchpad for composing tiny synth loops",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f14",
+  "theme_color": "#0f0f14",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "productivity", "utilities"],
+  "lang": "en"
+}
