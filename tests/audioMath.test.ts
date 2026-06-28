@@ -40,8 +40,8 @@ describe('bpmToStepSeconds', () => {
   it('returns 0.125s at 120 bpm, 16 steps', () => {
     expect(bpmToStepSeconds(120, 16)).toBeCloseTo(0.125, 5);
   });
-  it('returns 0.25s at 60 bpm, 8 steps', () => {
-    expect(bpmToStepSeconds(60, 8)).toBeCloseTo(0.25, 5);
+  it('returns 0.5s at 60 bpm, 8 steps', () => {
+    expect(bpmToStepSeconds(60, 8)).toBeCloseTo(0.5, 5);
   });
 });
 
