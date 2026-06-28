@@ -12,6 +12,8 @@ import { initAnnouncer, announce } from './ui/accessibility.js';
 import { renderSynthControls } from './ui/synthControls.js';
 import { initTransportControls, syncTransportUI, syncBpmInput } from './ui/transport.js';
 import { renderVisualizerPanel } from './ui/visualizerPanel.js';
+import { initIoDialog } from './ui/ioDialog.js';
+import type { IoDialogControls } from './ui/ioDialog.js';
 import type { AppState } from './state.js';
 import type { PatternGrid } from './sequencer.js';
 
@@ -61,6 +63,9 @@ const vizCtx = $vizCanvas.getContext('2d')!;
 
 // ── Accessibility init ────────────────────────────────────────────────
 initAnnouncer($announcer);
+
+// ── IO Dialog (wired below after helpers are defined) ─────────────────
+let ioDialog: IoDialogControls;
 
 // ── Preset browser ───────────────────────────────────────────────────
 function renderPresets() {
@@ -216,35 +221,29 @@ function renderViz() {
 }
 
 // ── Export / Import ──────────────────────────────────────────────────
-$btnExport.addEventListener('click', () => {
-  $ioTextarea.value = exportSketch(appState.sketch);
-  $ioDialog.hidden = false;
-  $ioTextarea.focus();
+ioDialog = initIoDialog($ioDialog, $ioTextarea, $btnCopy, $btnLoad, $btnCloseIO, {
+  onCopy: async (text) => {
+    await navigator.clipboard.writeText(text).catch(() => {});
+    announce('Copied to clipboard');
+  },
+  onLoad: (json) => {
+    try {
+      const sketch = importSketch(json);
+      stopTransport();
+      appState = { ...appState, sketch, transport: makeTransport(sketch.bpm), activePresetId: null, dirty: false };
+      grid = sketchToGrid(sketch);
+      syncBpmInput($bpmInput, sketch.bpm);
+      renderGrid(); renderSynth(); renderViz(); renderPresets();
+      ioDialog.close();
+      announce(`Loaded sketch: ${sketch.name}`);
+    } catch (e) {
+      announce(`Error: ${(e as Error).message}`);
+    }
+  },
+  onClose: () => ioDialog.close(),
 });
-$btnImport.addEventListener('click', () => {
-  $ioTextarea.value = '';
-  $ioDialog.hidden = false;
-  $ioTextarea.focus();
-});
-$btnCopy.addEventListener('click', async () => {
-  await navigator.clipboard.writeText($ioTextarea.value).catch(() => {});
-  announce('Copied to clipboard');
-});
-$btnLoad.addEventListener('click', () => {
-  try {
-    const sketch = importSketch($ioTextarea.value);
-    stopTransport();
-    appState = { ...appState, sketch, transport: makeTransport(sketch.bpm), activePresetId: null, dirty: false };
-    grid = sketchToGrid(sketch);
-    $bpmInput.value = String(sketch.bpm);
-    renderGrid(); renderSynth(); renderViz(); renderPresets();
-    $ioDialog.hidden = true;
-    announce(`Loaded sketch: ${sketch.name}`);
-  } catch (e) {
-    announce(`Error: ${(e as Error).message}`);
-  }
-});
-$btnCloseIO.addEventListener('click', () => { $ioDialog.hidden = true; });
+$btnExport.addEventListener('click', () => ioDialog.openExport(exportSketch(appState.sketch)));
+$btnImport.addEventListener('click', () => ioDialog.openImport());
 
 // ── Command palette ──────────────────────────────────────────────────
 function openPalette() {
