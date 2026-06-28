@@ -11,6 +11,7 @@ import { initPwa } from './pwa.js';
 import { initAnnouncer, announce } from './ui/accessibility.js';
 import { renderSynthControls } from './ui/synthControls.js';
 import { initTransportControls, syncTransportUI, syncBpmInput } from './ui/transport.js';
+import { renderVisualizerPanel } from './ui/visualizerPanel.js';
 import type { AppState } from './state.js';
 import type { PatternGrid } from './sequencer.js';
 
@@ -211,21 +212,7 @@ initTransportControls($playBtn, $stopBtn, $bpmInput, {
 
 // ── Visualizer ───────────────────────────────────────────────────────
 function renderViz() {
-  const voice = appState.sketch.voices[0];
-  if (!voice) return;
-  const row = grid.get(voice.id) ?? [];
-  const firstActive = row.find(s => s !== null);
-  if (firstActive) {
-    const waveform = generateWaveform(voice, firstActive.midi);
-    drawWaveform(vizCtx, waveform);
-  }
-  const bars = stepBarHeights(appState.sketch.voices, grid, DEFAULT_STEPS);
-  const barCanvas = document.createElement('canvas');
-  barCanvas.width = $vizCanvas.width;
-  barCanvas.height = 60;
-  const bCtx = barCanvas.getContext('2d')!;
-  drawStepBars(bCtx, bars, appState.transport.currentStep);
-  vizCtx.drawImage(barCanvas, 0, Math.floor($vizCanvas.height * 0.6));
+  renderVisualizerPanel(vizCtx, appState.sketch.voices, grid, appState.transport.currentStep, DEFAULT_STEPS);
 }
 
 // ── Export / Import ──────────────────────────────────────────────────
