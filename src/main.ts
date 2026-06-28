@@ -14,6 +14,8 @@ import { initTransportControls, syncTransportUI, syncBpmInput } from './ui/trans
 import { renderVisualizerPanel } from './ui/visualizerPanel.js';
 import { initIoDialog } from './ui/ioDialog.js';
 import type { IoDialogControls } from './ui/ioDialog.js';
+import { initCommandPalette } from './ui/commandPalette.js';
+import type { CommandPaletteControls } from './ui/commandPalette.js';
 import type { AppState } from './state.js';
 import type { PatternGrid } from './sequencer.js';
 
@@ -66,6 +68,7 @@ initAnnouncer($announcer);
 
 // ── IO Dialog (wired below after helpers are defined) ─────────────────
 let ioDialog: IoDialogControls;
+let palette: CommandPaletteControls;
 
 // ── Preset browser ───────────────────────────────────────────────────
 function renderPresets() {
@@ -246,44 +249,13 @@ $btnExport.addEventListener('click', () => ioDialog.openExport(exportSketch(appS
 $btnImport.addEventListener('click', () => ioDialog.openImport());
 
 // ── Command palette ──────────────────────────────────────────────────
-function openPalette() {
-  $palette.hidden = false;
-  $paletteInput.value = '';
-  renderPaletteResults('');
-  $paletteInput.focus();
-}
-function closePalette() { $palette.hidden = true; }
-
-function renderPaletteResults(q: string) {
-  const cmds = registry.search(q);
-  $paletteList.innerHTML = '';
-  cmds.forEach((cmd, i) => {
-    const li = document.createElement('li');
-    li.className = 'palette-item';
-    li.setAttribute('role', 'option');
-    li.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-    li.innerHTML = `<span class="palette-item-label">${cmd.label}${cmd.shortcut ? `<span class="palette-item-shortcut">${cmd.shortcut}</span>` : ''}</span><span class="palette-item-desc">${cmd.description}</span>`;
-    li.addEventListener('click', () => { closePalette(); void registry.execute(cmd.id); });
-    $paletteList.appendChild(li);
-  });
-}
-
-$btnPalette.addEventListener('click', openPalette);
-$paletteInput.addEventListener('input', () => renderPaletteResults($paletteInput.value));
-$paletteInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closePalette();
-  if (e.key === 'Enter') {
-    const first = $paletteList.querySelector<HTMLElement>('[aria-selected="true"]');
-    first?.click();
-  }
-});
-$palette.querySelector('.palette-backdrop')?.addEventListener('click', closePalette);
-$ioDialog.querySelector('.dialog-backdrop')?.addEventListener('click', () => { $ioDialog.hidden = true; });
+palette = initCommandPalette($palette, $paletteInput, $paletteList, registry);
+$btnPalette.addEventListener('click', () => palette.open());
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────
 document.addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openPalette(); }
-  if (e.key === 'Escape') { closePalette(); $ioDialog.hidden = true; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); palette.open(); }
+  if (e.key === 'Escape') { palette.close(); ioDialog.close(); }
   if (e.key === ' ' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLButtonElement)) {
     e.preventDefault();
     if (appState.transport.playing) stopTransport();
@@ -298,8 +270,8 @@ registerCommands([
   { id: 'preset.aurora', label: 'Load Aurora Pluck', description: 'Load the Aurora Pluck preset', category: 'Presets', action: () => loadPreset('aurora-pluck') },
   { id: 'preset.metro', label: 'Load Metro Bloom', description: 'Load the Metro Bloom preset', category: 'Presets', action: () => loadPreset('metro-bloom') },
   { id: 'preset.glass', label: 'Load Glass Tide', description: 'Load the Glass Tide preset', category: 'Presets', action: () => loadPreset('glass-tide') },
-  { id: 'sketch.export', label: 'Export Sketch', description: 'Export current sketch as JSON', category: 'Sketch', action: () => { $ioTextarea.value = exportSketch(appState.sketch); $ioDialog.hidden = false; } },
-  { id: 'sketch.import', label: 'Import Sketch', description: 'Import a sketch from JSON', category: 'Sketch', action: () => { $ioTextarea.value = ''; $ioDialog.hidden = false; } },
+  { id: 'sketch.export', label: 'Export Sketch', description: 'Export current sketch as JSON', category: 'Sketch', action: () => ioDialog.openExport(exportSketch(appState.sketch)) },
+  { id: 'sketch.import', label: 'Import Sketch', description: 'Import a sketch from JSON', category: 'Sketch', action: () => ioDialog.openImport() },
 ]);
 
 // ── Init ──────────────────────────────────────────────────────────────
