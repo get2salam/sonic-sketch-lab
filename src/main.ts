@@ -9,6 +9,7 @@ import { generateWaveform, stepBarHeights } from './visualizer.js';
 import { drawWaveform, drawStepBars } from './render.js';
 import { initPwa } from './pwa.js';
 import { initAnnouncer, announce } from './ui/accessibility.js';
+import { renderSynthControls } from './ui/synthControls.js';
 import type { AppState } from './state.js';
 import type { PatternGrid } from './sequencer.js';
 
@@ -151,44 +152,24 @@ function updateGridCurrentStep() {
 
 // ── Synth controls ───────────────────────────────────────────────────
 function renderSynth() {
-  $synthCtrl.innerHTML = '';
-  for (const voice of appState.sketch.voices) {
-    const section = document.createElement('fieldset');
-    section.style.cssText = 'border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-3);grid-column:1/-1';
-    section.innerHTML = `<legend style="font-size:var(--text-xs);font-family:var(--font-mono);color:var(--color-accent);padding:0 var(--space-2)">${voice.name}</legend>`;
-
-    const makeParam = (label: string, id: string, type: 'range' | 'select', opts: Record<string, unknown>) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'synth-param';
-      if (type === 'range') {
-        const min = String(opts.min ?? 0), max = String(opts.max ?? 1), step = String(opts.step ?? 0.01), val = String(opts.value ?? 0);
-        wrap.innerHTML = `<label for="${id}">${label}: <span id="${id}-val">${Number(opts.value ?? 0).toFixed(2)}</span></label>
-          <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}" aria-valuetext="${val}">`;
-      } else {
-        const choices = (opts.choices as string[]).map(c => `<option${c === opts.value ? ' selected' : ''}>${c}</option>`).join('');
-        wrap.innerHTML = `<label for="${id}">${label}</label><select id="${id}">${choices}</select>`;
-      }
-      return wrap;
-    };
-
-    const gainId = `gain-${voice.id}`;
-    section.appendChild(makeParam('Gain', gainId, 'range', { min: 0, max: 1, step: 0.01, value: voice.gain }));
-    const gainSlider = section.querySelector<HTMLInputElement>(`#${gainId}`)!;
-    gainSlider.addEventListener('input', () => {
-      voice.gain = parseFloat(gainSlider.value);
-      section.querySelector<HTMLElement>(`#${gainId}-val`)!.textContent = voice.gain.toFixed(2);
-      appState.dirty = true;
-    });
-
-    const oscId = `osc-${voice.id}`;
-    section.appendChild(makeParam('Waveform', oscId, 'select', { choices: ['sine','square','sawtooth','triangle'], value: voice.oscillator.type }));
-    section.querySelector<HTMLSelectElement>(`#${oscId}`)!.addEventListener('change', (e) => {
-      voice.oscillator.type = (e.target as HTMLSelectElement).value as typeof voice.oscillator.type;
-      appState.dirty = true;
-    });
-
-    $synthCtrl.appendChild(section);
-  }
+  renderSynthControls($synthCtrl, appState.sketch.voices, {
+    onGainChange: (id, gain) => {
+      const v = appState.sketch.voices.find((v) => v.id === id);
+      if (v) { v.gain = gain; appState.dirty = true; }
+    },
+    onOscChange: (id, type) => {
+      const v = appState.sketch.voices.find((v) => v.id === id);
+      if (v) { v.oscillator.type = type; appState.dirty = true; }
+    },
+    onEnvelopeChange: (id, key, value) => {
+      const v = appState.sketch.voices.find((v) => v.id === id);
+      if (v) { v.envelope[key] = value; appState.dirty = true; }
+    },
+    onFilterFreqChange: (id, freq) => {
+      const v = appState.sketch.voices.find((v) => v.id === id);
+      if (v) { v.filter.frequency = freq; appState.dirty = true; }
+    },
+  });
 }
 
 // ── Transport ─────────────────────────────────────────────────────────
