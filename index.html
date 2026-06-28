@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SonicSketch Lab — browser-based Web Audio sketchpad for composing tiny synth loops" />
+    <meta name="theme-color" content="#0f0f14" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>SonicSketch Lab</title>
+  </head>
+  <body>
+    <div id="app" role="main" aria-label="SonicSketch Lab application">
+
+      <header id="app-header" class="app-header">
+        <h1 class="app-title">
+          <span aria-hidden="true">◈</span>
+          SonicSketch Lab
+        </h1>
+        <nav class="header-nav" aria-label="Main actions">
+          <button id="btn-palette" class="icon-btn" aria-label="Open command palette" aria-keyshortcuts="Ctrl+K">
+            ⌘ Palette
+          </button>
+          <button id="btn-export" class="icon-btn" aria-label="Export sketch as JSON">
+            ↑ Export
+          </button>
+          <button id="btn-import" class="icon-btn" aria-label="Import sketch from JSON">
+            ↓ Import
+          </button>
+        </nav>
+      </header>
+
+      <div class="app-layout">
+
+        <aside id="preset-panel" class="panel preset-panel" aria-label="Preset browser">
+          <h2 class="panel-title">Presets</h2>
+          <ul id="preset-list" class="preset-list" role="listbox" aria-label="Available sketch presets"></ul>
+        </aside>
+
+        <main id="main-panel" class="panel main-panel">
+          <section id="transport-section" class="section transport-section" aria-label="Transport controls">
+            <button id="btn-play" class="transport-btn play-btn" aria-label="Play sequencer" aria-pressed="false">
+              ▶ Play
+            </button>
+            <button id="btn-stop" class="transport-btn stop-btn" aria-label="Stop sequencer">
+              ■ Stop
+            </button>
+            <label class="bpm-label" for="bpm-input">BPM</label>
+            <input id="bpm-input" class="bpm-input" type="number" min="40" max="240" value="120"
+                   aria-label="Beats per minute" />
+            <span id="step-display" class="step-display" aria-live="polite" aria-label="Current step"></span>
+          </section>
+
+          <section id="grid-section" class="section grid-section" aria-label="Step sequencer grid">
+            <div id="sequencer-grid" class="sequencer-grid" role="grid" aria-label="Step sequencer"></div>
+          </section>
+
+          <section id="synth-section" class="section synth-section" aria-label="Synthesizer controls">
+            <h2 class="panel-title">Synth</h2>
+            <div id="synth-controls" class="synth-controls"></div>
+          </section>
+        </main>
+
+        <aside id="viz-panel" class="panel viz-panel" aria-label="Visualizer">
+          <h2 class="panel-title">Visualizer</h2>
+          <canvas id="viz-canvas" class="viz-canvas" aria-label="Waveform visualizer" width="300" height="150"></canvas>
+        </aside>
+
+      </div>
+
+      <div id="command-palette" class="command-palette" role="dialog" aria-modal="true"
+           aria-label="Command palette" hidden>
+        <div class="palette-backdrop"></div>
+        <div class="palette-box">
+          <input id="palette-input" class="palette-input" type="search" placeholder="Type a command…"
+                 aria-label="Search commands" autocomplete="off" />
+          <ul id="palette-results" class="palette-results" role="listbox" aria-label="Command results"></ul>
+        </div>
+      </div>
+
+      <div id="io-dialog" class="io-dialog" role="dialog" aria-modal="true"
+           aria-label="Import / Export sketch" hidden>
+        <div class="dialog-backdrop"></div>
+        <div class="dialog-box">
+          <h2 class="dialog-title">Export / Import Sketch</h2>
+          <textarea id="io-textarea" class="io-textarea" rows="12" aria-label="Sketch JSON data"></textarea>
+          <div class="dialog-actions">
+            <button id="btn-copy-json" class="dialog-btn">Copy JSON</button>
+            <button id="btn-load-json" class="dialog-btn primary-btn">Load from Text</button>
+            <button id="btn-close-dialog" class="dialog-btn">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="aria-announcer" role="status" aria-live="polite" aria-atomic="true"
+           class="sr-only"></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
