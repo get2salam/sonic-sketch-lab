@@ -1,6 +1,6 @@
 import type { SynthVoice, Step } from './synthModel.js';
 import type { TransportState } from './sequencer.js';
-import { makeTransport, makePatternGrid, serializeGrid, deserializeGrid, DEFAULT_BPM } from './sequencer.js';
+import { makeTransport, makePatternGrid, serializeGrid, deserializeGrid } from './sequencer.js';
 import { PRESETS } from './presets.js';
 
 const STORAGE_KEY = 'sonic-sketch-lab:sketch';

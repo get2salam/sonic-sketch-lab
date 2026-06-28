@@ -5,8 +5,6 @@ import { makeTransport, advanceStep, getStepDuration, toggleStep, DEFAULT_STEPS 
 import { AudioEngine } from './audioEngine.js';
 import { detectCapabilities, describeGaps } from './capabilities.js';
 import { registry, registerCommands } from './commands.js';
-import { generateWaveform, stepBarHeights } from './visualizer.js';
-import { drawWaveform, drawStepBars } from './render.js';
 import { initPwa } from './pwa.js';
 import { initAnnouncer, announce } from './ui/accessibility.js';
 import { renderSynthControls } from './ui/synthControls.js';
@@ -143,7 +141,9 @@ function renderGrid() {
   }
 }
 
-function updateStepBtn(btn: HTMLButtonElement, step: ReturnType<typeof grid.get> extends Array<infer T> | undefined ? (ReturnType<typeof grid.get> extends Array<infer T> ? T : never) : never) {
+import type { Step } from './synthModel.js';
+
+function updateStepBtn(btn: HTMLButtonElement, step: Step) {
   const active = step !== null && step !== undefined;
   btn.setAttribute('data-active', active ? 'true' : 'false');
   btn.setAttribute('aria-pressed', active ? 'true' : 'false');

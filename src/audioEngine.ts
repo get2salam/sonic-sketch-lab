@@ -37,7 +37,7 @@ export class AudioEngine {
     if (!this.ctx) {
       const Ctor =
         globalThis.AudioContext ??
-        (globalThis as Record<string, typeof AudioContext>).webkitAudioContext;
+        (globalThis as unknown as Record<string, typeof AudioContext>).webkitAudioContext;
       if (!Ctor) {
         this._status = 'unavailable';
         return;

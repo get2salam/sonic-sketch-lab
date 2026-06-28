@@ -21,7 +21,7 @@ function makeRange(
   wrap.className = 'synth-param';
   wrap.innerHTML = `<label for="${id}">${label}: <span id="${id}-val">${value.toFixed(2)}</span></label>
     <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${value}"
-           aria-valuetext="${value.toFixed(2)">`;
+           aria-valuetext="${value.toFixed(2)}">`;
   return wrap;
 }
 

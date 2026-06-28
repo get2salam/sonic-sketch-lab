@@ -1,6 +1,5 @@
 import type { SynthVoice, Step } from './synthModel.js';
 import { offlineVoiceSample } from './audioEngine.js';
-import { midiToFreq } from './audioMath.js';
 
 /** A single waveform data point. */
 export interface WaveformPoint {
@@ -44,7 +43,7 @@ export function generateWaveform(
  * Mix waveforms for multiple active steps (sum, then clip to [-1, 1]).
  */
 export function mixWaveforms(
-  voices: SynthVoice[],
+  _voices: SynthVoice[],
   activeSteps: Array<{ voice: SynthVoice; step: Step }>,
   opts: Partial<WaveformOptions> = {},
 ): WaveformPoint[] {
