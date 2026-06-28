@@ -10,6 +10,7 @@ import { drawWaveform, drawStepBars } from './render.js';
 import { initPwa } from './pwa.js';
 import { initAnnouncer, announce } from './ui/accessibility.js';
 import { renderSynthControls } from './ui/synthControls.js';
+import { initTransportControls, syncTransportUI, syncBpmInput } from './ui/transport.js';
 import type { AppState } from './state.js';
 import type { PatternGrid } from './sequencer.js';
 
@@ -88,7 +89,7 @@ function loadPreset(id: string) {
     dirty: false,
   };
   grid = sketchToGrid(appState.sketch);
-  $bpmInput.value = String(preset.bpm);
+  syncBpmInput($bpmInput, preset.bpm);
   renderGrid();
   renderSynth();
   renderViz();
@@ -186,7 +187,7 @@ function tick() {
 async function startTransport() {
   await engine.resume();
   appState = { ...appState, transport: { ...appState.transport, playing: true, currentStep: 0 } };
-  $playBtn.setAttribute('aria-pressed', 'true');
+  syncTransportUI($playBtn, $stepDisplay, true, 0, DEFAULT_STEPS);
   tick();
   announce('Playing');
 }
@@ -195,21 +196,17 @@ function stopTransport() {
   appState = { ...appState, transport: { ...appState.transport, playing: false, currentStep: 0 } };
   if (tickTimer !== null) { clearTimeout(tickTimer); tickTimer = null; }
   engine.stopAll();
-  $playBtn.setAttribute('aria-pressed', 'false');
+  syncTransportUI($playBtn, $stepDisplay, false, 0, DEFAULT_STEPS);
   updateGridCurrentStep();
-  $stepDisplay.textContent = '';
   announce('Stopped');
 }
 
-$playBtn.addEventListener('click', () => {
-  if (appState.transport.playing) stopTransport();
-  else void startTransport();
-});
-$stopBtn.addEventListener('click', stopTransport);
-$bpmInput.addEventListener('change', () => {
-  const bpm = Math.max(40, Math.min(240, parseInt($bpmInput.value, 10)));
-  $bpmInput.value = String(bpm);
-  appState = { ...appState, transport: { ...appState.transport, bpm }, sketch: { ...appState.sketch, bpm } };
+initTransportControls($playBtn, $stopBtn, $bpmInput, {
+  onTogglePlay: () => { if (appState.transport.playing) stopTransport(); else void startTransport(); },
+  onStop: stopTransport,
+  onBpmChange: (bpm) => {
+    appState = { ...appState, transport: { ...appState.transport, bpm }, sketch: { ...appState.sketch, bpm } };
+  },
 });
 
 // ── Visualizer ───────────────────────────────────────────────────────
