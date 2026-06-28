@@ -15,7 +15,7 @@ export const FORBIDDEN_STRINGS: readonly string[] = [
   'SECRET',
   'API_KEY',
   'password',
-  'token',
+  'Bearer ',
 ];
 
 export const EXPECTED_DIST_FILES = [

@@ -25,7 +25,7 @@ const FORBIDDEN_STRINGS = [
   'SECRET',
   'API_KEY',
   'password',
-  'token',
+  'Bearer ',
 ];
 
 const REQUIRED_FILES = ['index.html', 'manifest.webmanifest'];

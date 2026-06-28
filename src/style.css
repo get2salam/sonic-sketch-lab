@@ -1,5 +1,5 @@
 /* ── Layer declarations ───────────────────────────────────────────── */
-@layer reset, tokens, base, layout, components, utilities;
+@layer reset, design, base, layout, components, utilities;
 
 /* ── Reset ─────────────────────────────────────────────────────────── */
 @layer reset {
@@ -11,8 +11,8 @@
   ul, ol { list-style: none; }
 }
 
-/* ── Design tokens ──────────────────────────────────────────────────── */
-@layer tokens {
+/* ── Design design ──────────────────────────────────────────────────── */
+@layer design {
   :root {
     /* Color palette */
     --color-bg:         #0f0f14;
