@@ -8,6 +8,7 @@ import { registry, registerCommands } from './commands.js';
 import { generateWaveform, stepBarHeights } from './visualizer.js';
 import { drawWaveform, drawStepBars } from './render.js';
 import { initPwa } from './pwa.js';
+import { initAnnouncer, announce } from './ui/accessibility.js';
 import type { AppState } from './state.js';
 import type { PatternGrid } from './sequencer.js';
 
@@ -55,11 +56,8 @@ const $btnPalette   = document.getElementById('btn-palette')!;
 
 const vizCtx = $vizCanvas.getContext('2d')!;
 
-// ── Announce helper ──────────────────────────────────────────────────
-function announce(msg: string) {
-  $announcer.textContent = '';
-  requestAnimationFrame(() => { $announcer.textContent = msg; });
-}
+// ── Accessibility init ────────────────────────────────────────────────
+initAnnouncer($announcer);
 
 // ── Preset browser ───────────────────────────────────────────────────
 function renderPresets() {
