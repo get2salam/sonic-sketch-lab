@@ -42,6 +42,7 @@ export function mapRange(
   outMin: number,
   outMax: number,
 ): number {
+  if (inMin === inMax) return outMin;
   const t = (value - inMin) / (inMax - inMin);
   return lerp(outMin, outMax, t);
 }

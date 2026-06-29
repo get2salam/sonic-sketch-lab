@@ -43,6 +43,12 @@ describe('bpmToStepSeconds', () => {
   it('returns 0.5s at 60 bpm, 8 steps', () => {
     expect(bpmToStepSeconds(60, 8)).toBeCloseTo(0.5, 5);
   });
+  it('uses 16 as the default subdivision', () => {
+    expect(bpmToStepSeconds(120)).toBeCloseTo(bpmToStepSeconds(120, 16), 10);
+  });
+  it('scales inversely with BPM', () => {
+    expect(bpmToStepSeconds(240, 16)).toBeCloseTo(bpmToStepSeconds(120, 16) / 2, 5);
+  });
 });
 
 describe('ampToDb / dbToAmp', () => {
@@ -71,11 +77,33 @@ describe('lerp', () => {
   it('returns b at t=1', () => expect(lerp(0, 10, 1)).toBe(10));
   it('returns midpoint at t=0.5', () => expect(lerp(0, 10, 0.5)).toBe(5));
   it('clamps t above 1', () => expect(lerp(0, 10, 2)).toBe(10));
+  it('clamps t below 0', () => expect(lerp(0, 10, -1)).toBe(0));
 });
 
 describe('mapRange', () => {
   it('maps 0.5 from [0,1] to [0,100]', () => {
     expect(mapRange(0.5, 0, 1, 0, 100)).toBeCloseTo(50, 5);
+  });
+
+  it('maps value below inMin (extrapolation clamps to outMin)', () => {
+    // t = (−0.5 − 0) / (1 − 0) = −0.5; lerp clamps t to 0 → outMin
+    expect(mapRange(-0.5, 0, 1, 0, 100)).toBeCloseTo(0, 5);
+  });
+
+  it('maps value above inMax (extrapolation clamps to outMax)', () => {
+    // t = (1.5 − 0) / (1 − 0) = 1.5; lerp clamps t to 1 → outMax
+    expect(mapRange(1.5, 0, 1, 0, 100)).toBeCloseTo(100, 5);
+  });
+
+  it('returns outMin (not NaN) for degenerate zero-width input range', () => {
+    // Without the guard, (value − inMin) / (inMin − inMin) = 0/0 = NaN
+    const result = mapRange(5, 5, 5, 10, 20);
+    expect(result).toBe(10);
+    expect(Number.isNaN(result)).toBe(false);
+  });
+
+  it('maps the full inMax value to outMax', () => {
+    expect(mapRange(1, 0, 1, 0, 100)).toBeCloseTo(100, 5);
   });
 });
 
