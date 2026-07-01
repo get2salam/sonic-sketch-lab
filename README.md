@@ -19,7 +19,8 @@ Browser-based Web Audio sketchpad for composing tiny synth loops — built with 
 npm install
 npm run dev       # start dev server at http://localhost:5173
 npm run build     # production build → dist/
-npm test          # run unit tests
+npm test          # run unit tests (148 tests)
+npm run coverage  # run tests + enforce coverage thresholds (≥50% stmts, ≥85% branches/functions)
 npm run smoke     # smoke-test the dist/ output
 ```
 
